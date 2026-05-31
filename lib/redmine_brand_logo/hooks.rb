@@ -18,6 +18,15 @@ module RedmineBrandLogo
 
       css = +""
 
+      # Add a small bottom margin on the header h1 so the #main-menu below
+      # doesn't visually overlap the logo / branded title. Applied for ANY
+      # plugin-configured mode (text-override, logo-only, text+logo).
+      if custom_text.present? || filename.present?
+        css << <<~CSS
+          #header h1 { margin-bottom: 10px !important; }
+        CSS
+      end
+
       # If a custom text is set, replace the displayed header text with it,
       # regardless of mode. Implemented by hiding the <h1>'s own text (font-size:0)
       # and using a ::after pseudo-element to inject the new label.
