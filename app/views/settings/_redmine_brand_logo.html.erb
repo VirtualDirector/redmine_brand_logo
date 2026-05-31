@@ -1,0 +1,80 @@
+<%# Configure form for Redmine Brand Logo plugin
+    Rendered in: admin → Pluginek → Redmine Brand Logo → Configure
+    settings is a hash provided by Redmine's settings_controller
+
+    IMPORTANT: this partial is rendered INSIDE the Redmine settings <form>.
+    Nested <form>...</form> elements are HTML-invalid; the browser ignores
+    inner forms. To upload a file or hit /remove from buttons inside the
+    settings form we use HTML5 `formaction` + `formenctype` + `formmethod`
+    attributes on the Submit buttons themselves, which override the
+    parent form's action only for that specific click. %>
+
+<p>
+  <label><%= l(:label_redmine_brand_logo_display_mode) %></label>
+  <%= radio_button_tag 'settings[display_mode]', 'text_only',
+        (settings['display_mode'] || 'text_only') == 'text_only', id: 'display_mode_text' %>
+  <label for="display_mode_text" class="inline"><%= l(:label_redmine_brand_logo_mode_text) %></label>
+  <%= radio_button_tag 'settings[display_mode]', 'logo_only',
+        settings['display_mode'] == 'logo_only', id: 'display_mode_logo' %>
+  <label for="display_mode_logo" class="inline"><%= l(:label_redmine_brand_logo_mode_logo) %></label>
+  <%= radio_button_tag 'settings[display_mode]', 'text_and_logo',
+        settings['display_mode'] == 'text_and_logo', id: 'display_mode_both' %>
+  <label for="display_mode_both" class="inline"><%= l(:label_redmine_brand_logo_mode_both) %></label>
+</p>
+
+<p>
+  <label for="settings_custom_text"><%= l(:label_redmine_brand_logo_custom_text) %></label>
+  <%= text_field_tag 'settings[custom_text]', settings['custom_text'], id: 'settings_custom_text', size: 50 %>
+  <em class="info"><%= l(:text_redmine_brand_logo_custom_text_hint) %></em>
+</p>
+
+<p>
+  <label for="settings_logo_height"><%= l(:label_redmine_brand_logo_height) %></label>
+  <%= number_field_tag 'settings[logo_height]', (settings['logo_height'] || '40'),
+                       id: 'settings_logo_height', min: 20, max: 120, step: 1, style: 'width:6em' %>
+  <em class="info">px (20–120)</em>
+</p>
+
+<hr>
+
+<p>
+  <strong><%= l(:label_redmine_brand_logo_current_logo) %></strong>
+  <% logo_file = settings['logo_filename'].to_s %>
+  <% if logo_file.present? %>
+    <code><%= logo_file %></code>
+    &nbsp;&nbsp;<img src="/redmine_brand_logo/serve?v=<%= logo_file.hash.abs %>"
+                     alt="logo preview"
+                     style="max-height: 60px; vertical-align: middle; border: 1px solid #ccc; background:#f7f7f7; padding:4px;">
+  <% else %>
+    <em><%= l(:label_redmine_brand_logo_no_logo) %></em>
+  <% end %>
+</p>
+
+<%# Upload section — uses HTML5 formaction/formenctype/formmethod on the button
+    to override the parent Redmine settings form's action for this click only.
+    The file_field is part of the parent form; the parent form's CSRF token
+    authenticates the request. %>
+<p>
+  <label for="logo_upload"><%= l(:label_redmine_brand_logo_upload) %></label>
+  <%= file_field_tag 'logo', accept: 'image/png,image/jpeg,image/gif,image/svg+xml,image/webp', id: 'logo_upload' %>
+  <button type="submit"
+          formaction="<%= url_for(controller: 'redmine_brand_logo', action: 'upload') %>"
+          formenctype="multipart/form-data"
+          formmethod="post">
+    <%= l(:button_redmine_brand_logo_upload) %>
+  </button>
+</p>
+<p class="info">
+  <%= l(:text_redmine_brand_logo_upload_hint) %>
+</p>
+
+<% if logo_file.present? %>
+  <p>
+    <button type="submit"
+            formaction="<%= url_for(controller: 'redmine_brand_logo', action: 'remove') %>"
+            formmethod="post"
+            data-confirm="<%= l(:text_are_you_sure) %>">
+      <%= l(:button_redmine_brand_logo_remove) %>
+    </button>
+  </p>
+<% end %>
