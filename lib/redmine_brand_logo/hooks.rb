@@ -18,12 +18,17 @@ module RedmineBrandLogo
 
       css = +""
 
-      # Add a small bottom margin on the header h1 so the #main-menu below
-      # doesn't visually overlap the logo / branded title. Applied for ANY
-      # plugin-configured mode (text-override, logo-only, text+logo).
+      # Ensure the bottom-anchored #main-menu doesn't overlap the logo / branded
+      # title. The #main-menu uses position:absolute; bottom:0 (Redmine core),
+      # so a h1 margin-bottom alone has no effect. We bump the header's
+      # padding-bottom — this works regardless of theme, because custom themes
+      # often reduce the core's 20px padding-bottom down to ~8px.
+      # The padding-bottom value is (logo_height + 16) px, so it scales with
+      # the configured logo height (default 40 + 16 = 56 px).
       if custom_text.present? || filename.present?
+        header_pad_bottom = height_px + 16
         css << <<~CSS
-          #header h1 { margin-bottom: 10px !important; }
+          #header { padding-bottom: #{header_pad_bottom}px !important; }
         CSS
       end
 
